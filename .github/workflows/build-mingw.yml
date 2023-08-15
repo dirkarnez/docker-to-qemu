@@ -25,6 +25,7 @@ jobs:
         run: |
           docker image pull golang:latest &&^
           docker save -o image.tar golang:latest &&^
+          dir &&^
           qemu-w64-20230810\qemu-img convert -f tar -O raw image.tar image.img
           
       - name: Archive Release
