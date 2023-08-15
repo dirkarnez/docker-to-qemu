@@ -26,7 +26,9 @@ jobs:
           docker image pull golang:latest &&^
           docker save -o image.tar golang:latest &&^
           dir &&^
-          qemu-w64-20230810\qemu-img convert -f tar -O raw image.tar image.img
+          tar xf image.tar &&^
+          qemu-w64-20230810\qemu-img convert -f raw -O qcow2 image.img image.qcow2 # &&^
+          # qemu-w64-20230810\qemu-img convert -f tar -O raw image.tar image.img
           
       - name: Archive Release
         uses: thedoctor0/zip-release@master
