@@ -1,0 +1,41 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'c*'
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: windows-latest
+    env:
+      targetZip: export.zip
+    steps:
+      - shell: cmd
+        run: |
+          curl https://github.com/dirkarnez/qemu-portable/raw/main/qemu-w64-20230810/qemu-w64-20230810.zip.001 -L -O -J &&^
+          curl https://github.com/dirkarnez/qemu-portable/raw/main/qemu-w64-20230810/qemu-w64-20230810.zip.002 -L -O -J &&^
+          curl https://github.com/dirkarnez/qemu-portable/raw/main/qemu-w64-20230810/qemu-w64-20230810.zip.003 -L -O -J &&^
+          7z x qemu-w64-20230810.zip.001 -o"qemu-w64-20230810" &&^
+          cd qemu-w64-20230810 &&^
+          dir
+          
+      - shell: cmd
+        run: |
+          docker save -o image.tar golang:latest &&^
+          qemu-w64-20230810\qemu-img convert -f tar -O raw image.tar image.img
+          
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          path: image.img
+          filename: "${{ env.targetZip }}"
+        
+      - name: Release prebuilt
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "${{ env.targetZip }}"
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
